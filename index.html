@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1423">
+  <meta name="description" content="An interactive lesson on determinants, swapping two matrix rows, cofactor expansion, Sarrus' rule, and oriented 3D volume.">
+  <title>Row Swap Lab — Determinants · Exercise 03</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg:#08111f;
+      --bg-mid:#0d182a;
+      --panel:#101e31;
+      --panel-2:#14263c;
+      --border:rgba(187,207,239,.14);
+      --text:#eff6ff;
+      --muted:#a4b4cc;
+      --faint:#6e83a1;
+      --accent-hue:169;
+      --accent:hsl(var(--accent-hue) 87% 63%);
+      --accent-wash:hsl(var(--accent-hue) 87% 63% / .10);
+      --pink:#ff759c;
+      --violet:#b699ff;
+      --gold:#ffcf81;
+      --green:#61e9bd;
+      --radius:22px;
+      --shadow:0 20px 80px rgba(0,0,0,.22);
+      --anim-ms:540ms;
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size:16px;
+      font-synthesis:none;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth;scroll-padding-top:92px}
+    body{margin:0;color:var(--text);background:var(--bg);line-height:1.6;overflow-x:hidden}
+    body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse 60% 32% at 10% -4%,hsl(var(--accent-hue) 90% 48% / .12),transparent 75%),radial-gradient(ellipse 42% 40% at 96% 9%,rgba(117,94,238,.12),transparent 75%)}
+    button,input{font:inherit}
+    button{cursor:pointer}
+    button:disabled{cursor:not-allowed;opacity:.43}
+    button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:4px}
+    a{color:inherit;text-decoration:none}
+    .container{width:min(1170px,calc(100% - 52px));margin:auto}
+    .mono,.math,.big-num,.stat-num,.cell,.work-cell,.live-cell,.mini-matrix,.s-cell,output,.numerical-input{font-family:ui-monospace,'SFMono-Regular',Consolas,'Liberation Mono',monospace;font-variant-numeric:tabular-nums}
+    .site-nav{position:sticky;top:0;z-index:30;min-height:72px;display:flex;align-items:center;background:rgba(8,17,31,.86);backdrop-filter:blur(19px);border-bottom:1px solid var(--border)}
+    .nav-inner{display:flex;align-items:center;justify-content:space-between;gap:24px}
+    .logo{display:flex;align-items:center;gap:12px;font-weight:800;letter-spacing:-.03em;white-space:nowrap}
+    .logo-badge{display:grid;place-items:center;border-radius:12px;width:34px;height:34px;background:var(--accent-wash);border:1px solid hsl(var(--accent-hue) 90% 65% / .36);color:var(--accent);font-size:23px;font-weight:800;line-height:1}
+    .logo-small{display:block;font-size:10px;font-weight:700;letter-spacing:.16em;color:var(--faint);line-height:1.2}
+    .nav-links{display:flex;align-items:center;gap:24px;font-size:13px;font-weight:700;color:var(--muted)}
+    .nav-links a{transition:color .2s}.nav-links a:hover{color:var(--accent)}
+    .nav-chip{padding:7px 11px;border:1px solid var(--border);border-radius:100px;font-size:11px;font-weight:800;color:var(--accent);letter-spacing:.06em}
+    .hero{position:relative;padding:94px 0 82px}
+    .hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:62px;align-items:center}
+    .kicker,.eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);font-weight:850}
+    .kicker::before{content:"";display:inline-block;width:19px;height:2px;margin-right:11px;background:var(--accent);vertical-align:middle}
+    h1,h2,h3,p{margin-top:0}
+    h1,h2,h3{line-height:1.13;letter-spacing:-.045em}
+    h1{font-size:clamp(46px,5.8vw,81px);margin:21px 0 24px;font-weight:850}
+    h1 em{font-style:normal;color:var(--accent)}
+    .hero p{max-width:490px;color:var(--muted);font-size:17px;line-height:1.85;margin-bottom:30px}
+    .hero-actions{display:flex;flex-wrap:wrap;gap:12px}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;border-radius:11px;border:1px solid var(--border);background:rgba(255,255,255,.045);color:var(--text);padding:11px 17px;font-size:13px;font-weight:800;transition:transform .2s,border-color .2s,background .2s}
+    .btn:hover:not(:disabled){transform:translateY(-2px);border-color:hsl(var(--accent-hue) 85% 65% / .6)}
+    .btn.primary{background:var(--accent);color:#071b1c;border:1px solid transparent;box-shadow:0 7px 30px hsl(var(--accent-hue) 80% 45% / .15)}
+    .btn.primary:hover:not(:disabled){background:hsl(var(--accent-hue) 92% 75%)}
+    .btn.pink{color:var(--pink);border-color:rgba(255,117,156,.25)}
+    .btn.compact{padding:8px 12px;font-size:12px}
+    .btn.active{border-color:var(--accent);background:var(--accent-wash);color:var(--accent)}
+    .hero-art{position:relative;padding:29px;border:1px solid var(--border);border-radius:28px;background:linear-gradient(135deg,rgba(24,42,66,.94),rgba(12,24,40,.9));box-shadow:var(--shadow);isolation:isolate;overflow:hidden}
+    .hero-art::before{content:"";position:absolute;z-index:-1;inset:0;background:radial-gradient(circle at 80% 9%,hsl(var(--accent-hue) 96% 65% / .10),transparent 45%)}
+    .art-top{display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--faint);font-size:10px;letter-spacing:.12em;font-weight:800}
+    .art-dot{height:8px;width:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 15px var(--accent);animation:pulse 3s infinite}
+    .comparison{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;margin-top:42px}
+    .mat-caption{text-align:center;font-size:12px;color:var(--muted);font-weight:750;letter-spacing:.08em;margin-bottom:17px}
+    .bracket-matrix{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;padding:8px 13px;width:fit-content;margin:0 auto}
+    .bracket-matrix::before,.bracket-matrix::after{content:"";position:absolute;top:0;bottom:0;width:8px;border:2px solid var(--faint);opacity:.8}
+    .bracket-matrix::before{left:0;border-right:0;border-radius:5px 0 0 5px}
+    .bracket-matrix::after{right:0;border-left:0;border-radius:0 5px 5px 0}
+    .bracket-matrix .cell{width:31px;height:30px;display:grid;place-items:center;border-radius:5px;font-weight:750;font-size:19px}
+    .bracket-matrix .cell.tone1{background:rgba(77,224,201,.1);color:#85ffdf}
+    .bracket-matrix .cell.tone2{background:rgba(182,153,255,.13);color:#d4c6ff}
+    .bracket-matrix .cell.tone3{color:#dce9fb}
+    .compare-arrow{position:relative;font-size:26px;color:var(--accent);animation:arrow-pulse 2.5s infinite}
+    .compare-line{margin:29px 0 19px;height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent)}
+    .compare-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .compare-stats>div{display:flex;flex-direction:column;align-items:center;gap:1px}
+    .stat-label{font-size:11px;color:var(--faint);font-weight:800;letter-spacing:.1em}
+    .stat-num{font-size:34px;line-height:1.3;font-weight:850}
+    .positive{color:var(--accent)}.negative{color:var(--pink)}
+    .stat-foot{margin-top:20px;text-align:center;color:var(--muted);font-size:12px}
+    .stat-foot strong{color:var(--text)}
+    .section{padding:62px 0 90px;scroll-margin-top:80px}
+    .section-line{height:1px;background:linear-gradient(90deg,transparent,var(--border) 15%,var(--border) 85%,transparent)}
+    .section-top{margin-bottom:32px}
+    .section-top h2{font-size:clamp(31px,4.1vw,50px);margin:12px 0 14px;font-weight:850}
+    .section-top p{font-size:15px;color:var(--muted);max-width:760px;line-height:1.8;margin-bottom:0}
+    .section-index{font-size:12px;letter-spacing:.15em;color:var(--accent);font-weight:850}
+    .theory-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+    .card,.panel{border:1px solid var(--border);border-radius:var(--radius);background:linear-gradient(140deg,rgba(20,37,59,.88),rgba(13,25,42,.9));box-shadow:0 8px 35px rgba(0,0,0,.08)}
+    .card{padding:24px;min-height:239px}
+    .card-icon{font-family:ui-monospace,monospace;font-weight:800;width:42px;height:42px;display:grid;place-items:center;border-radius:11px;margin-bottom:19px;background:var(--accent-wash);color:var(--accent);font-size:18px;border:1px solid hsl(var(--accent-hue) 80% 65% / .19)}
+    .card:nth-child(2) .card-icon{background:rgba(255,117,156,.11);color:var(--pink);border-color:rgba(255,117,156,.21)}
+    .card:nth-child(3) .card-icon{background:rgba(182,153,255,.12);color:var(--violet);border-color:rgba(182,153,255,.22)}
+    .card h3{font-size:19px;font-weight:800;margin-bottom:10px;letter-spacing:-.025em}
+    .card p{font-size:13px;line-height:1.8;color:var(--muted);margin-bottom:13px}
+    .formula{padding:10px 12px;background:rgba(5,14,24,.57);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:13px;white-space:normal;overflow-wrap:anywhere}
+    .theory-bottom{display:grid;grid-template-columns:1.3fr .7fr;gap:16px;margin-top:16px}
+    .rule-panel{padding:25px}
+    .rule-panel h3{font-size:17px;margin-bottom:17px}
+    .property-line{display:grid;grid-template-columns:1fr auto;gap:15px;padding:11px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--muted);align-items:center}
+    .property-line:last-child{border-bottom:none;padding-bottom:0}
+    .property-line strong{color:var(--text);font-weight:750}
+    .property-line code{font-size:12px;color:var(--accent);text-align:right}
+    .sign-panel{padding:24px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
+    .sign-panel h3{font-size:17px;margin-bottom:9px}
+    .checker{display:grid;grid-template-columns:repeat(3,40px);gap:5px;margin:12px auto 13px}
+    .sign-box{display:grid;place-items:center;height:40px;border-radius:8px;font-size:22px;font-weight:850}
+    .sign-box.plus{background:rgba(80,219,188,.11);color:var(--accent)}
+    .sign-box.minus{background:rgba(255,117,156,.11);color:var(--pink)}
+    .small-muted{color:var(--muted);font-size:12px;line-height:1.65}
+    .worked-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:18px;align-items:stretch}
+    .step-card{padding:29px;min-height:480px;display:flex;flex-direction:column}
+    .step-topline{display:flex;gap:12px;justify-content:space-between;align-items:center;margin-bottom:20px}
+    .pill{display:inline-flex;align-items:center;padding:5px 10px;font-weight:800;font-size:11px;letter-spacing:.08em;border-radius:100px;color:var(--accent);border:1px solid hsl(var(--accent-hue) 80% 60% / .26);background:var(--accent-wash)}
+    .step-count{font-size:12px;color:var(--muted);font-weight:700}
+    .step-content{flex:1;min-height:254px;animation:fade-up .28s ease both}
+    .step-content h3{font-size:25px;margin-bottom:15px}
+    .step-content p{color:var(--muted);font-size:14px;line-height:1.8}
+    .math-line{color:var(--text);font-family:ui-monospace,Consolas,monospace;font-size:15px;line-height:1.9;border-radius:12px;background:rgba(5,14,24,.65);border:1px solid var(--border);padding:18px;margin:18px 0;overflow-x:auto;white-space:normal}
+    .math-line strong{color:var(--accent);font-weight:850}
+    .math-line .pink{color:var(--pink)}
+    .math-line .math-small{font-size:13px;color:var(--muted)}
+    .step-note{color:var(--muted);font-size:12px;border-left:2px solid var(--accent);padding-left:12px;margin-top:14px}
+    .progress-track{height:4px;background:rgba(255,255,255,.08);border-radius:20px;overflow:hidden;margin-bottom:18px}
+    .progress-fill{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--violet));border-radius:20px;transition:width .3s}
+    .step-buttons{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+    .step-buttons .step-next{margin-left:auto}
+    .worked-visual{padding:27px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:480px;position:relative;overflow:hidden}
+    .worked-visual::before{content:"";position:absolute;width:300px;height:300px;left:50%;top:50%;transform:translate(-50%,-50%);background:radial-gradient(circle,hsl(var(--accent-hue) 90% 57% / .12),transparent 65%);pointer-events:none}
+    .worked-visual>*{position:relative}
+    .visual-top{align-self:stretch;display:flex;align-items:center;justify-content:space-between;color:var(--faint);font-size:11px;font-weight:800;letter-spacing:.11em;margin-bottom:auto}
+    .big-matrix-label{font-size:18px;font-weight:800;margin:40px 0 22px;letter-spacing:-.02em}
+    .work-matrix-shell{position:relative;padding:13px 22px;margin:0 auto}
+    .work-matrix-shell::before,.work-matrix-shell::after{content:"";position:absolute;top:0;bottom:0;width:12px;border:3px solid rgba(211,228,251,.53)}
+    .work-matrix-shell::before{left:0;border-right:0;border-radius:7px 0 0 7px}
+    .work-matrix-shell::after{right:0;border-left:0;border-radius:0 7px 7px 0}
+    .work-matrix-rows{display:grid;gap:7px}
+    .work-row{display:flex;gap:9px;align-items:center;will-change:transform}
+    .row-origin{font-size:10px;width:28px;color:var(--faint);font-family:ui-monospace,monospace}
+    .work-cell{height:45px;width:44px;background:rgba(255,255,255,.035);border:1px solid var(--border);border-radius:8px;display:grid;place-items:center;font-size:23px;font-weight:750}
+    .work-row[data-origin="0"] .work-cell{color:var(--accent)}
+    .work-row[data-origin="1"] .work-cell{color:var(--violet)}
+    .work-row[data-origin="2"] .work-cell{color:var(--text)}
+    .work-result{margin-top:33px;text-align:center}
+    .big-num{font-size:45px;font-weight:850;line-height:1.4}
+    .work-result small{display:block;color:var(--muted);font-size:11px;letter-spacing:.13em;font-weight:800}
+    .work-bottom{margin-top:auto;padding-top:22px;color:var(--faint);font-size:12px;text-align:center;max-width:320px}
+    .full-calculation{margin-top:18px;padding:24px 28px}
+    .full-calculation summary{cursor:pointer;font-weight:800;font-size:14px;list-style:none;display:flex;align-items:center;justify-content:space-between}
+    .full-calculation summary::-webkit-details-marker{display:none}
+    .full-calculation summary::after{content:"＋";color:var(--accent);font-size:22px}
+    .full-calculation[open] summary::after{content:"−"}
+    .calc-columns{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:20px}
+    .calc-columns .formula{height:100%;font-size:13px;line-height:2}
+    .calc-columns p{font-size:12px;color:var(--muted);margin:0 0 10px}
+    .lab-head{display:flex;gap:16px;justify-content:space-between;align-items:end;margin-bottom:28px}
+    .lab-head .section-top{margin-bottom:0}
+    .lab-layout{display:grid;grid-template-columns:1.12fr .88fr;gap:18px;align-items:stretch}
+    .editor-panel{padding:28px}
+    .panel-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px}
+    .panel-heading h3{margin:0;font-size:19px}
+    .panel-heading span{font-size:11px;color:var(--muted)}
+    .editor-row{border-top:1px solid var(--border);padding:17px 0 12px}
+    .editor-row:last-child{padding-bottom:0}
+    .editor-row-title{display:flex;align-items:center;gap:9px;margin-bottom:11px;font-size:12px;font-weight:800;color:var(--muted)}
+    .row-pill{width:9px;height:9px;border-radius:3px;background:var(--accent)}
+    .editor-row:nth-child(2) .row-pill{background:var(--violet)}
+    .editor-row:nth-child(3) .row-pill{background:var(--gold)}
+    .sliders{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+    .cell-slider{display:block;min-width:0}
+    .cell-slider-header{display:flex;align-items:center;justify-content:space-between;gap:7px;margin-bottom:5px}
+    .cell-slider-header .mini-label{font-family:ui-monospace,monospace;font-size:12px;color:var(--faint)}
+    .numerical-input{width:47px;max-width:100%;padding:5px 3px;background:rgba(0,0,0,.17);border:1px solid var(--border);color:var(--text);border-radius:6px;text-align:center;font-size:14px;font-weight:800;appearance:textfield;-moz-appearance:textfield}
+    .numerical-input::-webkit-outer-spin-button,.numerical-input::-webkit-inner-spin-button{appearance:none;margin:0}
+    input[type=range]{accent-color:var(--accent);cursor:pointer;width:100%;height:18px;margin:0;background:transparent}
+    .lab-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px;padding-top:20px;border-top:1px solid var(--border)}
+    .lab-actions .minor-action{font-size:12px}
+    .swap-actions{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin-top:17px}
+    .swap-label{font-size:12px;font-weight:750;color:var(--muted);margin-right:2px}
+    .lab-display{padding:28px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:452px}
+    .live-matrix-wrap{position:relative;margin:25px auto 15px;padding:12px 19px}
+    .live-matrix-wrap::before,.live-matrix-wrap::after{content:"";position:absolute;top:0;bottom:0;width:11px;border:3px solid rgba(212,225,245,.47)}
+    .live-matrix-wrap::before{left:0;border-right:0;border-radius:5px 0 0 5px}
+    .live-matrix-wrap::after{right:0;border-left:0;border-radius:0 5px 5px 0}
+    .live-matrix-rows{display:grid;gap:6px}
+    .lab-matrix-row{display:flex;gap:7px;will-change:transform}
+    .live-cell{display:grid;place-items:center;width:48px;height:44px;border:1px solid var(--border);border-radius:8px;background:rgba(255,255,255,.045);font-size:24px;font-weight:800}
+    .lab-matrix-row:nth-child(1) .live-cell{color:var(--accent)}
+    .lab-matrix-row:nth-child(2) .live-cell{color:var(--violet)}
+    .lab-matrix-row:nth-child(3) .live-cell{color:var(--gold)}
+    .live-det-label{font-size:11px;letter-spacing:.14em;color:var(--muted);font-weight:850;margin-top:18px}
+    .live-det{font-size:60px;font-weight:850;line-height:1.25;transition:color .2s}
+    .live-status{font-size:13px;color:var(--muted);margin-bottom:16px;min-height:19px}
+    .signed-bar{width:min(300px,100%);height:12px;position:relative;background:linear-gradient(90deg,rgba(255,117,156,.1),rgba(255,255,255,.05) 50%,hsl(var(--accent-hue) 90% 62% / .1));border-radius:100px;margin:2px auto 10px;border:1px solid var(--border);overflow:hidden}
+    .signed-bar::after{content:"";position:absolute;top:-2px;bottom:-2px;left:50%;width:2px;background:rgba(255,255,255,.6)}
+    .signed-fill{position:absolute;top:1px;bottom:1px;width:0;background:var(--accent);left:50%;border-radius:100px;transition:left .35s,width .35s,background .25s}
+    .signed-scale{width:min(300px,100%);display:flex;justify-content:space-between;color:var(--faint);font-size:10px;font-family:ui-monospace,monospace}
+    .latest-action{margin-top:22px;padding:12px 15px;border-radius:10px;border:1px solid var(--border);color:var(--muted);font-size:12px;min-height:45px;width:100%}
+    .explore-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    .explore-panel{padding:27px;min-width:0}
+    .explore-panel p{font-size:13px;color:var(--muted);line-height:1.7}
+    .explore-title{font-size:22px;font-weight:850;margin:0 0 8px}
+    .control-label{display:block;font-size:12px;font-weight:800;color:var(--muted);margin:18px 0 10px}
+    .segmented{display:flex;gap:6px}
+    .segmented button{flex:1;background:rgba(255,255,255,.035);border:1px solid var(--border);color:var(--muted);border-radius:9px;font-size:12px;padding:9px 8px;font-weight:800}
+    .segmented button.active{background:var(--accent-wash);border-color:var(--accent);color:var(--accent)}
+    .minor-preview{display:flex;align-items:center;justify-content:center;gap:15px;padding:14px 10px;background:rgba(0,0,0,.16);border:1px solid var(--border);border-radius:12px;margin-top:15px;min-height:115px}
+    .mini-matrix{position:relative;display:grid;grid-template-columns:repeat(2,41px);gap:5px;padding:7px 12px}
+    .mini-matrix::before,.mini-matrix::after{position:absolute;content:"";top:0;bottom:0;width:7px;border:2px solid var(--faint)}
+    .mini-matrix::before{left:0;border-right:0}.mini-matrix::after{right:0;border-left:0}
+    .mini-matrix span{height:35px;display:grid;place-items:center;color:var(--text);font-size:20px}
+    .minor-expression{font-size:15px;font-weight:750;color:var(--accent);font-family:ui-monospace,monospace}
+    .cofactor-sum{margin-top:16px;padding:12px;font-size:13px;line-height:1.95;overflow-wrap:anywhere}
+    .cofactor-sum b{color:var(--accent)}
+    .term-detail{font-size:12px;color:var(--muted);margin-top:12px;min-height:47px}
+    .term-detail strong{color:var(--text)}
+    .sarrus-wrap{overflow-x:auto;padding-bottom:3px}
+    .sarrus-board{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin:22px 0 8px;min-width:290px}
+    .s-cell{display:grid;place-items:center;height:47px;border:1px solid var(--border);border-radius:8px;background:rgba(255,255,255,.035);font-size:20px;font-weight:750;position:relative;transition:background .2s,border-color .2s,transform .2s,color .2s}
+    .s-cell.repeated{opacity:.67;border-style:dashed}
+    .s-cell.active-plus{background:hsl(var(--accent-hue) 80% 57% / .17);border-color:var(--accent);color:var(--accent);transform:scale(1.06);z-index:1;opacity:1}
+    .s-cell.active-minus{background:rgba(255,117,156,.17);border-color:var(--pink);color:var(--pink);transform:scale(1.06);z-index:1;opacity:1}
+    .repeat-note{text-align:center;color:var(--faint);font-size:11px}
+    .direction-tags{display:flex;justify-content:space-between;gap:10px;margin-top:14px;font-size:12px;font-weight:800}
+    .direction-tags .plus{color:var(--accent)}.direction-tags .minus{color:var(--pink)}
+    .sarrus-selected{margin:16px 0;padding:12px;background:rgba(0,0,0,.17);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:ui-monospace,monospace;font-size:12px;min-height:50px}
+    .sarrus-total{display:grid;grid-template-columns:1fr auto 1fr auto auto;gap:8px;align-items:center;padding:10px 12px;border-top:1px solid var(--border);margin-top:12px;font-family:ui-monospace,monospace;font-size:15px;font-weight:800}
+    .sarrus-total span{color:var(--muted);font-size:12px}
+    .sarrus-total strong{color:var(--accent)}
+    .geometry-layout{display:grid;grid-template-columns:1.35fr .65fr;gap:18px}
+    .canvas-panel{padding:16px 22px 20px;position:relative;overflow:hidden}
+    .canvas-top{display:flex;justify-content:space-between;gap:12px;align-items:center;position:relative;z-index:2}
+    .canvas-top span{color:var(--muted);font-size:11px;letter-spacing:.08em;font-weight:800}
+    .canvas-top .pill{font-size:10px}
+    #volumeCanvas{display:block;width:100%;height:370px;margin-top:4px;border-radius:12px;touch-action:pan-y;cursor:grab}
+    #volumeCanvas:active{cursor:grabbing}
+    .vector-legend{display:flex;justify-content:center;gap:22px;flex-wrap:wrap;border-top:1px solid var(--border);padding:15px 0 2px;color:var(--muted);font-size:12px}
+    .legend-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle;background:var(--accent)}
+    .legend-dot.violet{background:var(--violet)}.legend-dot.gold{background:var(--gold)}
+    .geom-controls{padding:26px;display:flex;flex-direction:column}
+    .geom-controls h3{font-size:20px;margin-bottom:7px}
+    .geom-controls>p{font-size:13px;color:var(--muted);line-height:1.7}
+    .control-line{display:flex;justify-content:space-between;gap:12px;font-size:12px;font-weight:800;color:var(--muted)}
+    .control-line output{color:var(--text)}
+    .setting{margin:15px 0 6px}
+    .geometry-metric{background:rgba(0,0,0,.2);padding:14px;border-radius:12px;border:1px solid var(--border);margin:20px 0 4px}
+    .geometry-metric small{display:block;font-size:11px;color:var(--muted)}
+    .geometry-metric b{font-size:26px;font-family:ui-monospace,monospace;color:var(--accent)}
+    .geom-controls .btn{margin-top:auto}
+    .tip{padding:16px 19px;background:hsl(var(--accent-hue) 80% 60% / .075);border:1px solid hsl(var(--accent-hue) 80% 60% / .2);border-radius:13px;color:var(--muted);font-size:13px;line-height:1.8;margin-top:18px}
+    .tip b{color:var(--accent)}
+    .quiz-layout{display:grid;grid-template-columns:1.2fr .8fr;gap:20px;align-items:center}
+    .quiz-panel{padding:30px}
+    .quiz-question{font-size:22px;line-height:1.4;font-weight:800;margin:13px 0 24px;letter-spacing:-.025em}
+    .quiz-answers{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .quiz-choice{border:1px solid var(--border);border-radius:12px;padding:14px 10px;background:rgba(255,255,255,.035);font:800 20px ui-monospace,monospace;color:var(--text);transition:background .2s,transform .2s}
+    .quiz-choice:hover:not(:disabled){transform:translateY(-2px);background:var(--accent-wash)}
+    .quiz-choice.correct{background:rgba(80,225,176,.11);border-color:var(--accent);color:var(--accent)}
+    .quiz-choice.wrong{background:rgba(255,117,156,.13);border-color:var(--pink);color:var(--pink)}
+    .quiz-feedback{min-height:62px;color:var(--muted);font-size:13px;margin-top:17px;line-height:1.7}
+    .quiz-side{padding:20px 8px}
+    .quiz-side h3{font-size:29px;margin-bottom:12px}
+    .quiz-side p{font-size:14px;line-height:1.85;color:var(--muted)}
+    .quiz-score{font-size:43px;font-weight:850;font-family:ui-monospace,monospace;color:var(--accent)}
+    .footer{border-top:1px solid var(--border);margin-top:15px;padding:26px 0 42px;color:var(--faint);font-size:12px}
+    .footer-inner{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+    .sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    @keyframes pulse{50%{opacity:.4;transform:scale(.78)}}
+    @keyframes arrow-pulse{50%{transform:translateX(7px);opacity:.6}}
+    @keyframes fade-up{from{opacity:.4;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+    @media(max-width:1000px){.comparison{gap:6px}.hero-grid{gap:30px}.hero-art{padding:22px}.bracket-matrix{gap:5px}.bracket-matrix .cell{width:26px;font-size:16px}.lab-layout{grid-template-columns:1fr 1fr}.geometry-layout{grid-template-columns:1.1fr .9fr}}
+    @media(max-width:790px){.hero{padding:68px 0}.hero-grid,.worked-grid,.lab-layout,.explore-grid,.geometry-layout,.quiz-layout{grid-template-columns:1fr}.hero-art{max-width:530px;width:100%}.hero-grid{gap:42px}.theory-grid{grid-template-columns:1fr 1fr}.theory-grid .card:last-child{grid-column:span 2}.theory-bottom{grid-template-columns:1fr 1fr}.worked-visual{min-height:380px}.step-card{min-height:420px}.lab-display{min-height:370px}.quiz-side{padding:2px 0 8px}.nav-links{gap:13px}.nav-links a:last-child{display:none}}
+    @media(max-width:555px){.container{width:min(100% - 30px,1170px)}.nav-links{display:none}.site-nav{min-height:62px}.hero{padding:53px 0 58px}.hero p{font-size:15px}.hero-art{padding:18px}.comparison{gap:4px;margin-top:28px}.bracket-matrix .cell{width:25px;height:27px;font-size:17px}.bracket-matrix{gap:4px;padding:6px 10px}.compare-arrow{font-size:17px}.mat-caption{font-size:10px}.section{padding:45px 0 60px}.theory-grid,.theory-bottom,.calc-columns{grid-template-columns:1fr}.theory-grid .card:last-child{grid-column:auto}.card{min-height:auto}.step-card,.worked-visual,.editor-panel,.lab-display,.explore-panel,.geom-controls,.quiz-panel{padding:21px}.sliders{gap:7px}.numerical-input{width:40px}.live-cell{height:40px;width:41px;font-size:21px}.step-buttons .step-next{margin-left:0}.quiz-answers{gap:6px}.quiz-choice{font-size:17px}.sarrus-board{gap:4px}.s-cell{height:43px;font-size:17px}.footer-inner{display:block}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+  </style>
+</head>
+<body>
+  <nav class="site-nav" aria-label="Main navigation">
+    <div class="container nav-inner">
+      <a href="#top" class="logo"><span class="logo-badge">Δ</span><span>ROW SWAP LAB<span class="logo-small">LINEAR ALGEBRA / 03</span></span></a>
+      <div class="nav-links"><a href="#theory">Theory</a><a href="#solution">Solution</a><a href="#playground">Matrix Lab</a><a href="#visualize">3D Geometry</a><a href="#quiz">Quick Quiz</a></div>
+      <span class="nav-chip">INTERACTIVE · OFFLINE</span>
+    </div>
+  </nav>
+
+  <main id="top">
+    <header class="hero">
+      <div class="container hero-grid">
+        <div>
+          <div class="kicker">Exercise 03 / Determinants</div>
+          <h1>Swap the rows.<br><em>Flip the sign.</em></h1>
+          <p>A visual, hands-on lesson about one of the most elegant determinant properties. Start with the mathematics, follow the exact solution, then change the numbers and see what happens.</p>
+          <div class="hero-actions"><a class="btn primary" href="#theory">Start learning <span aria-hidden="true">↗</span></a><a class="btn" href="#playground">Open matrix lab ↘</a></div>
+        </div>
+        <div class="hero-art" aria-label="Matrix A has determinant six. Matrix B, formed by exchanging the first two rows, has determinant negative six.">
+          <div class="art-top"><span>THE ROW-SWAP EXPERIMENT</span><span class="art-dot" aria-hidden="true"></span></div>
+          <div class="comparison">
+            <div><div class="mat-caption">ORIGINAL / A</div><div class="bracket-matrix" aria-hidden="true">
+              <span class="cell tone1">1</span><span class="cell tone1">2</span><span class="cell tone1">0</span>
+              <span class="cell tone2">0</span><span class="cell tone2">3</span><span class="cell tone2">1</span>
+              <span class="cell tone3">2</span><span class="cell tone3">1</span><span class="cell tone3">1</span>
+            </div></div>
+            <span class="compare-arrow" aria-hidden="true">→</span>
+            <div><div class="mat-caption">SWAPPED / B</div><div class="bracket-matrix" aria-hidden="true">
+              <span class="cell tone2">0</span><span class="cell tone2">3</span><span class="cell tone2">1</span>
+              <span class="cell tone1">1</span><span class="cell tone1">2</span><span class="cell tone1">0</span>
+              <span class="cell tone3">2</span><span class="cell tone3">1</span><span class="cell tone3">1</span>
+            </div></div>
+          </div>
+          <div class="compare-line"></div>
+          <div class="compare-stats"><div><span class="stat-label">det A</span><strong class="stat-num positive">+6</strong></div><div><span class="stat-label">det B</span><strong class="stat-num negative">−6</strong></div></div>
+          <div class="stat-foot">Same absolute value. <strong>Opposite sign.</strong></div>
+        </div>
+      </div>
+    </header>
+
+    <div class="section-line"></div>
+    <section id="theory" class="section">
+      <div class="container">
+        <div class="section-top"><div class="section-index">01 / GENERAL THEORY</div><h2>What does the determinant mean?</h2><p>The determinant is a number attached to a square matrix. In three dimensions, it measures the <strong style="color:var(--text)">signed volume</strong> of the parallelepiped spanned by the row vectors. Its magnitude measures volume; its sign tracks orientation.</p></div>
+        <div class="theory-grid">
+          <article class="card"><div class="card-icon">|A|</div><h3>Magnitude = volume</h3><p>For a 3 × 3 matrix, the absolute value |det A| equals the volume spanned by its three row vectors. If the vectors are coplanar, the volume is zero.</p><div class="formula mono">Volume = |det A| ≥ 0</div></article>
+          <article class="card"><div class="card-icon">↕</div><h3>Swapping changes sign</h3><p>A determinant is <em>alternating</em> in its rows. Exchanging any two rows reverses the orientation, while the volume stays exactly the same.</p><div class="formula mono">det(swap<sub>i,j</sub> A) = −det A</div></article>
+          <article class="card"><div class="card-icon">Σ</div><h3>Cofactor expansion</h3><p>Expand along any row: multiply each entry by its 2 × 2 minor and the appropriate checkerboard sign. All row expansions produce the same determinant.</p><div class="formula mono">det A = Σ<sub>j</sub> (−1)<sup>i+j</sup> a<sub>ij</sub> M<sub>ij</sub></div></article>
+        </div>
+        <div class="theory-bottom">
+          <div class="panel rule-panel"><h3>Three essential row operations</h3>
+            <div class="property-line"><span><strong>Exchange rows:</strong> R<sub>i</sub> ↔ R<sub>j</sub></span><code>det → −det</code></div>
+            <div class="property-line"><span><strong>Scale a row:</strong> R<sub>i</sub> → kR<sub>i</sub></span><code>det → k·det</code></div>
+            <div class="property-line"><span><strong>Add another row:</strong> R<sub>i</sub> → R<sub>i</sub> + kR<sub>j</sub></span><code>det unchanged</code></div>
+            <div class="property-line"><span><strong>Two identical rows:</strong> R<sub>i</sub> = R<sub>j</sub></span><code>det = 0</code></div>
+          </div>
+          <div class="panel sign-panel"><h3>Cofactor sign pattern</h3><div class="checker" aria-label="Plus minus plus; minus plus minus; plus minus plus"><span class="sign-box plus">+</span><span class="sign-box minus">−</span><span class="sign-box plus">+</span><span class="sign-box minus">−</span><span class="sign-box plus">+</span><span class="sign-box minus">−</span><span class="sign-box plus">+</span><span class="sign-box minus">−</span><span class="sign-box plus">+</span></div><p class="small-muted">Each minor M<sub>ij</sub> is the determinant of the 2 × 2 matrix left after deleting row <em>i</em> and column <em>j</em>.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-line"></div>
+    <section id="solution" class="section">
+      <div class="container">
+        <div class="section-top"><div class="section-index">02 / WORKED EXERCISE</div><h2>Solve it, one step at a time.</h2><p>Compute det A, exchange the first two rows, predict det B from the theorem, and verify by direct calculation. Click <strong style="color:var(--text)">Next step</strong> to animate the argument.</p></div>
+        <div class="worked-grid">
+          <div class="panel step-card"><div class="step-topline"><span class="pill" id="stepTag">GIVEN MATRIX</span><span class="step-count" id="stepCount">Step 1 of 7</span></div><div class="step-content" id="stepContent" aria-live="polite"></div><div class="progress-track" aria-label="Solution progress"><div class="progress-fill" id="stepProgress"></div></div><div class="step-buttons"><button class="btn compact" id="stepPrev" type="button">← Previous</button><button class="btn compact" id="stepReset" type="button">↺ Restart</button><button class="btn compact" id="stepPlay" type="button" aria-pressed="false">▶ Auto-play</button><button class="btn primary compact step-next" id="stepNext" type="button">Next step →</button></div></div>
+          <div class="panel worked-visual"><div class="visual-top"><span>LIVE STEP VISUALIZATION</span><span id="workMode" class="pill">A</span></div><div class="big-matrix-label" id="workMatrixLabel">Matrix A</div><div class="work-matrix-shell"><div class="work-matrix-rows" id="workRows" aria-label="Matrix A"></div></div><div class="work-result"><small id="workDetLabel">DETERMINANT OF A</small><div class="big-num positive" id="workDet">+6</div></div><div class="work-bottom" id="workHint">The determinant is found by expanding along the first row.</div></div>
+        </div>
+        <details class="panel full-calculation"><summary>Show the complete written solution and Sarrus verification</summary><div class="calc-columns">
+          <div><p><strong>1. Compute det A</strong> by expanding across row 1.</p><div class="formula mono">det A = 1(3·1 − 1·1) − 2(0·1 − 1·2) + 0<br>= 1·2 − 2·(−2)<br>= 2 + 4 = <strong class="positive">6</strong></div><p style="margin-top:14px"><strong>2. Swap rows 1 and 2.</strong> Now B = [[0, 3, 1], [1, 2, 0], [2, 1, 1]]. Prediction: det B = −det A = −6.</p></div>
+          <div><p><strong>3. Verify det B</strong> by expanding across row 1.</p><div class="formula mono">det B = 0 − 3(1·1 − 0·2) + 1(1·1 − 2·2)<br>= −3·1 + 1·(−3)<br>= <strong class="negative">−6</strong></div><p style="margin-top:14px"><strong>4. Sarrus check for A:</strong> downward products 3 + 4 + 0 = 7, upward products 0 + 1 + 0 = 1. Thus det A = 7 − 1 = 6.</p></div>
+        </div></details>
+      </div>
+    </section>
+
+    <div class="section-line"></div>
+    <section id="playground" class="section">
+      <div class="container">
+        <div class="lab-head"><div class="section-top"><div class="section-index">03 / HANDS-ON EXPERIMENT</div><h2>Take control of the matrix.</h2><p>Move any of the nine sliders or type an integer. Swap two rows and watch the determinant respond. These experiments are separate from the fixed worked solution above.</p></div><button type="button" id="resetMatrix" class="btn compact">↺ Reset to A</button></div>
+        <div class="lab-layout">
+          <div class="panel editor-panel"><div class="panel-heading"><h3>Matrix entries</h3><span>SLIDERS: −5 TO +5</span></div><div id="matrixSliders"></div><div class="lab-actions" aria-label="Matrix presets"><button class="btn compact minor-action active" type="button" data-preset="original">Original A</button><button class="btn compact minor-action" type="button" data-preset="identity">Identity</button><button class="btn compact minor-action" type="button" data-preset="duplicate">Equal rows</button><button class="btn compact minor-action" type="button" data-preset="triangular">Triangular</button><button class="btn compact minor-action" type="button" data-preset="random">Random</button></div><div class="swap-actions"><span class="swap-label">Exchange:</span><button type="button" class="btn compact pink" data-swap="0,1">R₁ ↔ R₂</button><button type="button" class="btn compact pink" data-swap="0,2">R₁ ↔ R₃</button><button type="button" class="btn compact pink" data-swap="1,2">R₂ ↔ R₃</button></div></div>
+          <div class="panel lab-display"><div class="eyebrow">YOUR CURRENT MATRIX</div><div class="live-matrix-wrap"><div class="live-matrix-rows" id="liveRows" aria-label="Editable three-by-three matrix"></div></div><div class="live-det-label">DETERMINANT</div><div class="live-det positive mono" id="liveDet" aria-live="polite">+6</div><div class="live-status" id="liveStatus">Positive orientation · nonzero volume</div><div class="signed-bar" aria-label="Signed determinant visualization"><div class="signed-fill" id="signedFill"></div></div><div class="signed-scale"><span>−</span><span>0</span><span>+</span></div><div class="latest-action" id="latestAction" aria-live="polite">Tip: Try swapping R₁ and R₂. The determinant becomes −6.</div></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-line"></div>
+    <section id="methods" class="section">
+      <div class="container"><div class="section-top"><div class="section-index">04 / COMPUTATION METHODS</div><h2>Look inside the calculation.</h2><p>Both panels recalculate instantly from your editable matrix. Inspect the 2 × 2 minors or follow individual diagonals in Sarrus' rule.</p></div>
+        <div class="explore-grid">
+          <div class="panel explore-panel"><h3 class="explore-title">Cofactor explorer</h3><p>Choose an expansion row and a term. The highlighted 2 × 2 minor is computed after deleting the selected row and column.</p><label class="control-label">Expand along</label><div class="segmented" role="group" aria-label="Choose expansion row"><button type="button" data-expand-row="0" class="active">Row 1</button><button type="button" data-expand-row="1">Row 2</button><button type="button" data-expand-row="2">Row 3</button></div><label class="control-label" for="cofactorTerm">Choose term: <output id="cofactorNumber">1 / 3</output></label><input type="range" min="1" max="3" step="1" value="1" id="cofactorTerm"><div class="minor-preview"><div class="mini-matrix" id="minorMatrix" aria-label="Selected two-by-two minor"></div><div class="minor-expression" id="minorExpression"></div></div><div class="formula mono cofactor-sum" id="cofactorSum"></div><div class="term-detail" id="termDetail"></div></div>
+          <div class="panel explore-panel"><h3 class="explore-title">Sarrus' rule</h3><p>Only for <strong style="color:var(--text)">3 × 3</strong> matrices: append the first two columns, add three downward products and subtract three upward products.</p><div class="sarrus-wrap"><div class="sarrus-board" id="sarrusBoard" aria-label="Sarrus matrix with two columns repeated"></div></div><div class="repeat-note">The last two columns repeat the first two.</div><div class="direction-tags"><span class="plus">↘ Add downward products</span><span class="minus">↗ Subtract upward products</span></div><label class="control-label" for="sarrusTerm">Inspect diagonal: <output id="sarrusNumber">1 / 6</output></label><input type="range" min="1" max="6" step="1" value="1" id="sarrusTerm"><div class="sarrus-selected" id="sarrusSelected"></div><div class="sarrus-total" id="sarrusTotal"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-line"></div>
+    <section id="visualize" class="section">
+      <div class="container"><div class="section-top"><div class="section-index">05 / GEOMETRIC INTUITION</div><h2>See the oriented volume in 3D.</h2><p>Treat the three rows as vectors in 3D space. They span a parallelepiped of volume |det A|. Exchanging two row vectors changes its orientation, not its size. Drag the picture or use the controls to rotate it.</p></div>
+      <div class="geometry-layout">
+        <div class="panel canvas-panel"><div class="canvas-top"><span>3D VECTOR VIEW · DRAG TO ROTATE</span><span class="pill" id="orientationBadge">POSITIVE ORIENTATION</span></div><canvas id="volumeCanvas" role="img" aria-label="Projected 3D parallelepiped spanned by the three current row vectors"></canvas><div class="vector-legend"><span><i class="legend-dot"></i>Row vector 1</span><span><i class="legend-dot violet"></i>Row vector 2</span><span><i class="legend-dot gold"></i>Row vector 3</span></div></div>
+        <div class="panel geom-controls"><h3>Camera & appearance</h3><p>Rotate the vectors and tune the animation. Try the row-swap buttons in the matrix lab and compare the signed determinant.</p><div class="setting"><div class="control-line"><label for="yaw">Rotation</label><output id="yawValue">−30°</output></div><input id="yaw" type="range" min="0" max="360" value="330"></div><div class="setting"><div class="control-line"><label for="tilt">Camera tilt</label><output id="tiltValue">55°</output></div><input id="tilt" type="range" min="15" max="85" value="55"></div><div class="setting"><div class="control-line"><label for="speed">Rotation speed</label><output id="speedValue">1.0×</output></div><input id="speed" type="range" min="0.2" max="3" step="0.1" value="1"></div><div class="setting"><div class="control-line"><label for="hue">Theme color</label><output id="hueValue">Mint</output></div><input id="hue" type="range" min="145" max="300" step="1" value="169"></div><div class="geometry-metric"><small>UNSIGNED VOLUME</small><b id="volumeMetric">6</b><small id="volumeText">The same after any row swap.</small></div><button class="btn primary" type="button" id="spinToggle" aria-pressed="false">▶ Start rotation</button></div>
+      </div><div class="tip"><b>Why does the sign flip?</b> Think of the three rows as an ordered basis. Swapping two vectors reverses the handedness of that ordered basis. The parallelepiped is geometrically identical, but its <em>orientation</em> is opposite. If det = 0, its 3D volume collapses to zero.</div>
+      </div>
+    </section>
+
+    <div class="section-line"></div>
+    <section id="quiz" class="section"><div class="container"><div class="quiz-layout"><div class="panel quiz-panel"><div class="pill" id="quizStep">QUESTION 1 OF 3</div><h3 class="quiz-question" id="quizQuestion"></h3><div class="quiz-answers" id="quizAnswers"></div><div class="quiz-feedback" id="quizFeedback" aria-live="polite">Choose an answer to check your understanding.</div><button type="button" class="btn compact primary" id="quizNext" disabled>Next question →</button></div><div class="quiz-side"><div class="section-index">06 / QUICK SELF-TEST</div><h3>Can you predict the determinant without calculating it?</h3><p>Use the row-operation rules, not a cofactor expansion. Three short checks are enough to confirm the central idea.</p><div class="quiz-score" id="quizScore">0 / 3</div><div class="small-muted">Correct answers</div></div></div></div></section>
+  </main>
+  <footer class="footer"><div class="container footer-inner"><span>Δ ROW SWAP LAB · Exercise 03 · Linear algebra</span><span>Self-contained HTML · No libraries · Works offline · Ready for GitHub Pages</span></div></footer>
+
+<script>
+(() => {
+  'use strict';
+  const ORIGINAL = [[1,2,0],[0,3,1],[2,1,1]];
+  const PRESETS = {
+    original: ORIGINAL,
+    identity: [[1,0,0],[0,1,0],[0,0,1]],
+    duplicate: [[1,2,0],[1,2,0],[2,1,1]],
+    triangular: [[2,1,-2],[0,3,1],[0,0,-2]]
+  };
+  const $ = id => document.getElementById(id);
+  const clone = A => A.map(row => [...row]);
+  const det2 = (a,b,c,d) => a*d - b*c;
+  const determinant = A => A[0][0]*det2(A[1][1],A[1][2],A[2][1],A[2][2]) - A[0][1]*det2(A[1][0],A[1][2],A[2][0],A[2][2]) + A[0][2]*det2(A[1][0],A[1][1],A[2][0],A[2][1]);
+  const signNumber = v => v > 0 ? `+${v}` : v < 0 ? `−${Math.abs(v)}` : '0';
+  const niceNum = v => v < 0 ? `−${Math.abs(v)}` : String(v);
+  const factor = v => v < 0 ? `(${niceNum(v)})` : niceNum(v);
+  const subscript = v => String(v).replace(/[0-9]/g, c => '₀₁₂₃₄₅₆₇₈₉'[Number(c)]);
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let matrix = clone(ORIGINAL), swaps = 0, selectedRow = 0, selectedCol = 0, sarrusIndex = 0;
+  let lastAction = 'Tip: Try swapping R₁ and R₂. The determinant becomes −6.';
+  let animationBusy = false;
+  let accentHue = 169;
+
+  /* SOLUTION STEPPER — fixed original matrices (unaffected by playground). */
+  const steps = [
+    {tag:'GIVEN MATRIX', title:'Begin with the given matrix', text:'The matrix A has three rows. We will expand its determinant along the first row: 1, 2, 0.', formula:'A = [[1, 2, 0], [0, 3, 1], [2, 1, 1]]', note:'A row expansion uses the pattern +, −, +.'},
+    {tag:'COFACTOR EXPANSION', title:'Expand det A along row 1', text:'Multiply each entry in the first row by the corresponding 2 × 2 minor, with alternating signs.', formula:'det A = 1(3·1 − 1·1) − 2(0·1 − 1·2) + 0(0·1 − 3·2)', note:'The final term vanishes because the third entry is zero.'},
+    {tag:'EVALUATE', title:'Calculate the determinant of A', text:'The first minor is 2; the second is −2. Apply the minus sign in the cofactor expansion.', formula:'det A = 1·2 − 2·(−2) + 0 = 2 + 4 = <strong>6</strong>', note:'We have proved det A = +6. The volume is 6 cubic units.'},
+    {tag:'EXCHANGE ROWS', title:'Swap the first and second rows', text:'Interchange R₁ and R₂ while leaving R₃ untouched. Watch the two colored rows exchange positions in the matrix.', formula:'B = [[0, 3, 1], [1, 2, 0], [2, 1, 1]]', note:'Changing the order of the row vectors reverses orientation.'},
+    {tag:'PREDICTION', title:'Predict det B using the theorem', text:'A single transposition of two rows multiplies the determinant by −1. There is no need to recompute any minor to make this prediction.', formula:'det B = −det A = −6', note:'The absolute value |det B| is still 6.'},
+    {tag:'DIRECT VERIFICATION', title:'Verify det B by calculation', text:'Expand the new matrix B along its first row: 0, 3, 1. The result must agree with the predicted sign.', formula:'det B = 0 − 3(1·1 − 0·2) + 1(1·1 − 2·2)<br>= −3 − 3 = <strong class="pink">−6</strong>', note:'Direct calculation confirms det B = −6.'},
+    {tag:'SECOND CHECK', title:'Verify A using Sarrus’ rule', text:'For a 3 × 3 determinant, sum the three downward diagonal products and subtract the three upward diagonal products.', formula:'Downward: 3 + 4 + 0 = 7<br>Upward: 0 + 1 + 0 = 1<br>det A = 7 − 1 = <strong>6</strong>', note:'Final answer: det A = 6 and det B = −6.'}
+  ];
+  let stepIndex = 0, stepTimer = null, exampleIsSwapped = false;
+  const workRows = $('workRows');
+  function makeWorkedRows(){
+    ORIGINAL.forEach((row,i) => {
+      const el = document.createElement('div');
+      el.className='work-row';el.dataset.origin=String(i);
+      el.innerHTML = `<span class="row-origin">R${subscript(i+1)}</span>${row.map(x=>`<span class="work-cell">${x}</span>`).join('')}`;
+      workRows.appendChild(el);
+    });
+  }
+  function reorderChildren(container, target, animate=true){
+    const oldPositions = new Map([...container.children].map(el => [el,el.getBoundingClientRect()]));
+    target.forEach(el=>container.appendChild(el));
+    if(animate && !reducedMotion){
+      target.forEach(el => {
+        const old = oldPositions.get(el), current = el.getBoundingClientRect();
+        const delta = old.top-current.top;
+        if(Math.abs(delta)>.1) el.animate([{transform:`translateY(${delta}px)`,filter:'brightness(1.8)'},{transform:'translateY(0)',filter:'brightness(1)'}],{duration:650,easing:'cubic-bezier(.2,.8,.2,1)'});
+      });
+    }
+  }
+  function setExampleSwap(swapped, animate=true){
+    if(exampleIsSwapped === swapped) return;
+    const children=[...workRows.children];
+    children.sort((a,b)=>{
+      const order=swapped?[1,0,2]:[0,1,2];
+      return order.indexOf(Number(a.dataset.origin))-order.indexOf(Number(b.dataset.origin));
+    });
+    reorderChildren(workRows,children,animate);
+    exampleIsSwapped=swapped;
+  }
+  function stopAutoplay(){if(stepTimer!==null){clearInterval(stepTimer);stepTimer=null;} $('stepPlay').textContent='▶ Auto-play';$('stepPlay').setAttribute('aria-pressed','false');}
+  function renderStep(next,animated=true){
+    next=Math.min(steps.length-1,Math.max(0,next));
+    stepIndex=next;
+    const s=steps[next];
+    $('stepTag').textContent=s.tag;
+    $('stepCount').textContent=`Step ${next+1} of ${steps.length}`;
+    const content=$('stepContent');
+    content.style.animation='none';void content.offsetWidth;content.style.animation='';
+    content.innerHTML=`<h3>${s.title}</h3><p>${s.text}</p><div class="math-line">${s.formula}</div><div class="step-note">${s.note}</div>`;
+    $('stepProgress').style.width=`${(next+1)/steps.length*100}%`;
+    $('stepPrev').disabled=(next===0);
+    $('stepNext').disabled=(next===steps.length-1);
+    setExampleSwap(next>=3,animated);
+    $('workMode').textContent=next>=3?'B':'A';
+    $('workMatrixLabel').textContent=next>=3?'Matrix B':'Matrix A';
+    $('workDetLabel').textContent=next>=3?'DETERMINANT OF B':'DETERMINANT OF A';
+    $('workDet').textContent=next>=3?'−6':'+6';
+    $('workDet').className=`big-num ${next>=3?'negative':'positive'}`;
+    $('workHint').textContent=next>=3?'One row swap: orientation reverses, volume stays 6.':'The three original row vectors span a volume of 6.';
+    workRows.setAttribute('aria-label',next>=3?'Matrix B':'Matrix A');
+    if(next===steps.length-1)stopAutoplay();
+  }
+  makeWorkedRows();renderStep(0,false);
+  $('stepPrev').addEventListener('click',()=>{stopAutoplay();renderStep(stepIndex-1)});
+  $('stepNext').addEventListener('click',()=>{stopAutoplay();renderStep(stepIndex+1)});
+  $('stepReset').addEventListener('click',()=>{stopAutoplay();renderStep(0)});
+  $('stepPlay').addEventListener('click',()=>{
+    if(stepTimer!==null){stopAutoplay();return;}
+    if(stepIndex===steps.length-1)renderStep(0);
+    $('stepPlay').textContent='❚❚ Pause';$('stepPlay').setAttribute('aria-pressed','true');
+    stepTimer=setInterval(()=>renderStep(stepIndex+1),2300);
+  });
+
+  /* 3×3 INPUT EDITOR */
+  function buildSliders(){
+    const parent=$('matrixSliders');parent.innerHTML='';
+    for(let r=0;r<3;r++){
+      const rowEl=document.createElement('div');rowEl.className='editor-row';
+      const dotColor=['var(--accent)','var(--violet)','var(--gold)'][r];
+      rowEl.innerHTML=`<div class="editor-row-title"><i class="row-pill" style="background:${dotColor}"></i>ROW ${r+1}</div><div class="sliders">${Array.from({length:3},(_,c)=>`<label class="cell-slider"><div class="cell-slider-header"><span class="mini-label">a${subscript(r+1)}${subscript(c+1)}</span><input type="number" class="numerical-input" data-edit="${r},${c}" value="${matrix[r][c]}" min="-9" max="9" step="1" aria-label="Entry row ${r+1}, column ${c+1}"></div><input type="range" min="-5" max="5" step="1" data-slide="${r},${c}" value="${matrix[r][c]}" aria-label="Slider row ${r+1}, column ${c+1}"></label>`).join('')}</div>`;
+      parent.appendChild(rowEl);
+    }
+    parent.querySelectorAll('[data-slide]').forEach(input=>input.addEventListener('input',()=>{
+      const [r,c]=input.dataset.slide.split(',').map(Number);
+      setCell(r,c,Number(input.value),'slider');
+    }));
+    parent.querySelectorAll('[data-edit]').forEach(input=>{
+      input.addEventListener('change',()=>{
+        const [r,c]=input.dataset.edit.split(',').map(Number);
+        const n=Number(input.value);
+        setCell(r,c,Number.isFinite(n)?Math.max(-9,Math.min(9,Math.round(n))):matrix[r][c],'number');
+      });
+    });
+  }
+  function makeLiveRows(){
+    $('liveRows').innerHTML='';
+    for(let r=0;r<3;r++){
+      const el=document.createElement('div');el.className='lab-matrix-row';el.innerHTML=matrix[r].map(x=>`<span class="live-cell">${x}</span>`).join('');$('liveRows').appendChild(el);
+    }
+  }
+  function refreshSliderValues(){
+    document.querySelectorAll('[data-slide]').forEach(input=>{
+      const [r,c]=input.dataset.slide.split(',').map(Number);input.value=String(Math.max(-5,Math.min(5,matrix[r][c])));
+    });
+    document.querySelectorAll('[data-edit]').forEach(input=>{
+      const [r,c]=input.dataset.edit.split(',').map(Number);input.value=String(matrix[r][c]);
+    });
+  }
+  function refreshLiveRows(){
+    [...$('liveRows').children].forEach((rowEl,r)=>{
+      rowEl.querySelectorAll('.live-cell').forEach((cell,c)=>{cell.textContent=String(matrix[r][c]);});
+    });
+  }
+  function setPresetActive(key){
+    document.querySelectorAll('[data-preset]').forEach(btn=>btn.classList.toggle('active',btn.dataset.preset===key));
+  }
+  function setCell(r,c,v,source){
+    matrix[r][c]=v;
+    lastAction=`Changed a${subscript(r+1)}${subscript(c+1)} to ${niceNum(v)}. The determinant and both methods updated.`;
+    setPresetActive('');refreshAll();
+  }
+  function usePreset(name){
+    if(name==='random')matrix=Array.from({length:3},()=>Array.from({length:3},()=>Math.floor(Math.random()*9)-4));
+    else matrix=clone(PRESETS[name]);
+    swaps=0;
+    lastAction=name==='original'?'Original matrix A restored. det A = +6.':name==='duplicate'?'Two identical rows force det = 0.':name==='identity'?'The identity matrix has determinant +1.':name==='triangular'?'Triangular matrix: det = 2 × 3 × (−2) = −12.':'Random matrix generated. Try exchanging rows!';
+    setPresetActive(name);makeLiveRows();refreshAll();
+  }
+  function swapRows(i,j){
+    if(animationBusy)return;
+    const oldDet=determinant(matrix);
+    const rowEls=[...$('liveRows').children];
+    const newOrder=[...rowEls];[newOrder[i],newOrder[j]]=[newOrder[j],newOrder[i]];
+    reorderChildren($('liveRows'),newOrder,true);
+    [matrix[i],matrix[j]]=[matrix[j],matrix[i]];
+    swaps++;
+    const newDet=determinant(matrix);
+    lastAction=`Swap ${i+1} ↔ ${j+1}: det changed from ${signNumber(oldDet)} to ${signNumber(newDet)}. ${newDet===-oldDet?'✓ Sign-flip property verified.':''}`;
+    setPresetActive('');
+    animationBusy=true;
+    document.querySelectorAll('[data-swap]').forEach(b=>b.disabled=true);
+    // The DOM rows have physically moved. Their contents now represent the swapped matrix.
+    refreshAll();
+    window.setTimeout(()=>{
+      animationBusy=false;document.querySelectorAll('[data-swap]').forEach(b=>b.disabled=false);
+      refreshLiveRows();
+    },reducedMotion?0:680);
+  }
+  document.querySelectorAll('[data-preset]').forEach(btn=>btn.addEventListener('click',()=>usePreset(btn.dataset.preset)));
+  document.querySelectorAll('[data-swap]').forEach(btn=>btn.addEventListener('click',()=>{const [i,j]=btn.dataset.swap.split(',').map(Number);swapRows(i,j);}));
+  $('resetMatrix').addEventListener('click',()=>usePreset('original'));
+  buildSliders();makeLiveRows();
+
+  function minorOf(A,r,c){
+    const m=A.filter((_,i)=>i!==r).map(row=>row.filter((_,j)=>j!==c));
+    return {m,det:det2(m[0][0],m[0][1],m[1][0],m[1][1])};
+  }
+  function updateCofactor(){
+    document.querySelectorAll('[data-expand-row]').forEach(btn=>btn.classList.toggle('active',Number(btn.dataset.expandRow)===selectedRow));
+    $('cofactorTerm').value=selectedCol+1;
+    $('cofactorNumber').textContent=`${selectedCol+1} / 3`;
+    const {m,det:minorDet}=minorOf(matrix,selectedRow,selectedCol);
+    $('minorMatrix').innerHTML=m.flat().map(x=>`<span>${niceNum(x)}</span>`).join('');
+    $('minorExpression').textContent=`${niceNum(m[0][0])}·${niceNum(m[1][1])} − ${niceNum(m[0][1])}·${niceNum(m[1][0])} = ${niceNum(minorDet)}`;
+    const entries=matrix[selectedRow].map((a,c)=>({a,c,minor:minorOf(matrix,selectedRow,c).det,sign:(selectedRow+c)%2===0?1:-1}));
+    const terms=entries.map(({a,minor,sign})=>a*minor*sign);
+    const formula=entries.map(({a,minor,sign},c)=>{
+      const prefix=c===0?(sign===1?'':'−'):(sign===1?' + ':' − ');
+      return `<span ${c===selectedCol?'style="color:var(--accent);font-weight:800"':''}>${prefix}${factor(a)}·(${niceNum(minor)})</span>`;
+    }).join('');
+    $('cofactorSum').innerHTML=`det = ${formula}<br>= <b>${niceNum(terms.reduce((a,b)=>a+b,0))}</b>`;
+    const chosen=entries[selectedCol];
+    $('termDetail').innerHTML=`Entry <strong>a${subscript(selectedRow+1)}${subscript(selectedCol+1)} = ${niceNum(chosen.a)}</strong> · sign <strong>${chosen.sign>0?'+':'−'}</strong> · minor <strong>${niceNum(chosen.minor)}</strong> · contribution <strong>${niceNum(terms[selectedCol])}</strong>`;
+  }
+  document.querySelectorAll('[data-expand-row]').forEach(btn=>btn.addEventListener('click',()=>{selectedRow=Number(btn.dataset.expandRow);selectedCol=0;updateCofactor()}));
+  $('cofactorTerm').addEventListener('input',e=>{selectedCol=Number(e.target.value)-1;updateCofactor()});
+
+  // In the 3×5 Sarrus panel, columns 4 and 5 repeat columns 1 and 2.
+  const diagonals=Array.from({length:3},(_,k)=>({type:'plus',cells:[[0,k],[1,k+1],[2,k+2]]})).concat(
+    Array.from({length:3},(_,k)=>({type:'minus',cells:[[2,k],[1,k+1],[0,k+2]]}))
+  );
+  const diagonalProduct = d=>d.cells.reduce((v,[r,c])=>v*matrix[r][c%3],1);
+  function updateSarrus(){
+    const chosen=diagonals[sarrusIndex];
+    const highlighted=new Set(chosen.cells.map(([r,c])=>`${r},${c}`));
+    const board=$('sarrusBoard');board.innerHTML='';
+    for(let r=0;r<3;r++)for(let c=0;c<5;c++){
+      const cell=document.createElement('div');
+      cell.className=`s-cell ${c>=3?'repeated':''} ${highlighted.has(`${r},${c}`)?`active-${chosen.type}`:''}`;
+      cell.textContent=matrix[r][c%3];board.appendChild(cell);
+    }
+    $('sarrusNumber').textContent=`${sarrusIndex+1} / 6`;
+    const terms=chosen.cells.map(([r,c])=>matrix[r][c%3]);
+    const product=diagonalProduct(chosen);
+    $('sarrusSelected').textContent=`${chosen.type==='plus'?'↘ Add':'↗ Subtract'}: ${terms.map(niceNum).join(' × ')} = ${niceNum(product)}`;
+    const forwards=diagonals.slice(0,3).reduce((sum,d)=>sum+diagonalProduct(d),0);
+    const backwards=diagonals.slice(3).reduce((sum,d)=>sum+diagonalProduct(d),0);
+    $('sarrusTotal').innerHTML=`<span>↘ Sum</span>${niceNum(forwards)} <span>− ↗ Sum</span>${niceNum(backwards)} <strong>= ${niceNum(forwards-backwards)}</strong>`;
+  }
+  $('sarrusTerm').addEventListener('input',e=>{sarrusIndex=Number(e.target.value)-1;updateSarrus()});
+
+  /* INTERACTIVE 3D DRAWING — no external 3D library needed. */
+  const canvas=$('volumeCanvas'),ctx=canvas.getContext('2d');
+  let yaw=330,tilt=55,speed=1,spinning=false,lastFrame=0,dragging=false,lastX=0,lastY=0;
+  let canvasWidth=0,canvasHeight=370;
+  function setCanvasSize(){
+    if(!ctx)return;
+    const rect=canvas.getBoundingClientRect();
+    const dpr=Math.min(window.devicePixelRatio||1,2);
+    canvasWidth=Math.max(1,rect.width);canvasHeight=Math.max(1,rect.height);
+    canvas.width=Math.round(canvasWidth*dpr);canvas.height=Math.round(canvasHeight*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);drawVolume();
+  }
+  function project(v){
+    const az=yaw*Math.PI/180,el=tilt*Math.PI/180;
+    const x=v[0]*Math.cos(az)-v[1]*Math.sin(az);
+    const y=v[0]*Math.sin(az)+v[1]*Math.cos(az);
+    return {x:x, y:y*Math.sin(el)-v[2]*Math.cos(el), depth:y*Math.cos(el)+v[2]*Math.sin(el)};
+  }
+  const add=(a,b)=>[a[0]+b[0],a[1]+b[1],a[2]+b[2]];
+  function drawArrow(a,b,color,label){
+    const dx=b.x-a.x,dy=b.y-a.y,angle=Math.atan2(dy,dx),length=Math.hypot(dx,dy);
+    if(length<1)return;
+    ctx.save();ctx.strokeStyle=color;ctx.fillStyle=color;ctx.lineWidth=3;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+    const arrowSize=Math.min(11,length*.36);ctx.beginPath();ctx.moveTo(b.x,b.y);ctx.lineTo(b.x-arrowSize*Math.cos(angle-.48),b.y-arrowSize*Math.sin(angle-.48));ctx.lineTo(b.x-arrowSize*Math.cos(angle+.48),b.y-arrowSize*Math.sin(angle+.48));ctx.closePath();ctx.fill();
+    ctx.font='bold 13px ui-monospace,Consolas,monospace';ctx.fillText(label,b.x+11,b.y-9);ctx.restore();
+  }
+  function drawVolume(){
+    if(!ctx || !canvasWidth)return;
+    const W=canvasWidth,H=canvasHeight;
+    ctx.clearRect(0,0,W,H);
+    // Subtle dot field in the background, spaced by 26 px.
+    ctx.fillStyle='rgba(166,193,232,.10)';
+    for(let x=14;x<W;x+=26)for(let y=18;y<H;y+=26){ctx.beginPath();ctx.arc(x,y,.7,0,2*Math.PI);ctx.fill()}
+    const verts=[];
+    for(let idx=0;idx<8;idx++){
+      let v=[0,0,0];for(let r=0;r<3;r++)if(idx&(1<<r))v=add(v,matrix[r]);
+      verts.push(project(v));
+    }
+    const xs=verts.map(p=>p.x),ys=verts.map(p=>p.y);
+    let minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);
+    const dimX=Math.max(.5,maxX-minX),dimY=Math.max(.5,maxY-minY);
+    const scale=Math.min((W-105)/dimX,(H-100)/dimY,87);
+    const tx=W/2-(minX+maxX)/2*scale,ty=H/2-(minY+maxY)/2*scale;
+    const pts=verts.map(p=>({x:tx+p.x*scale,y:ty+p.y*scale,depth:p.depth}));
+    const faces=[
+      {idx:[0,2,6,4],color:`hsla(${accentHue},84%,60%,.11)`},
+      {idx:[1,3,7,5],color:`hsla(${accentHue},84%,60%,.23)`},
+      {idx:[0,1,5,4],color:'rgba(182,153,255,.11)'},
+      {idx:[2,3,7,6],color:'rgba(182,153,255,.23)'},
+      {idx:[0,1,3,2],color:'rgba(255,207,129,.10)'},
+      {idx:[4,5,7,6],color:'rgba(255,207,129,.22)'}
+    ];
+    faces.sort((a,b)=>a.idx.reduce((s,i)=>s+pts[i].depth,0)-b.idx.reduce((s,i)=>s+pts[i].depth,0));
+    faces.forEach(face=>{
+      ctx.beginPath();face.idx.forEach((i,j)=>j?ctx.lineTo(pts[i].x,pts[i].y):ctx.moveTo(pts[i].x,pts[i].y));ctx.closePath();
+      ctx.fillStyle=face.color;ctx.fill();ctx.strokeStyle='rgba(178,205,237,.32)';ctx.lineWidth=1;ctx.stroke();
+    });
+    // Axes are drawn as vectors from the origin to the ends of the three rows.
+    const hues=[`hsl(${accentHue} 87% 65%)`,'#b699ff','#ffcf81'];
+    [1,2,4].forEach((idx,r)=>drawArrow(pts[0],pts[idx],hues[r],`r${subscript(r+1)}`));
+    ctx.beginPath();ctx.arc(pts[0].x,pts[0].y,4,0,Math.PI*2);ctx.fillStyle='#ffffff';ctx.fill();
+    // Small caption in the view itself.
+    ctx.font='12px ui-monospace,Consolas,monospace';ctx.fillStyle='rgba(191,211,236,.75)';
+    ctx.fillText(`|det| = ${Math.abs(determinant(matrix))}`,16,H-15);
+  }
+  function updateGeometryNumbers(){
+    const det=determinant(matrix);
+    $('volumeMetric').textContent=Math.abs(det);
+    $('volumeText').textContent=det===0?'Degenerate: the 3D volume is zero.':'A row swap preserves this magnitude.';
+    $('orientationBadge').textContent=det>0?'POSITIVE ORIENTATION':det<0?'NEGATIVE ORIENTATION':'ZERO VOLUME';
+    $('orientationBadge').style.color=det<0?'var(--pink)':'var(--accent)';
+    drawVolume();
+  }
+  $('yaw').addEventListener('input',e=>{yaw=Number(e.target.value);$('yawValue').textContent=`${yaw>180?yaw-360:yaw}°`;drawVolume()});
+  $('tilt').addEventListener('input',e=>{tilt=Number(e.target.value);$('tiltValue').textContent=`${tilt}°`;drawVolume()});
+  $('speed').addEventListener('input',e=>{speed=Number(e.target.value);$('speedValue').textContent=`${speed.toFixed(1)}×`});
+  $('hue').addEventListener('input',e=>{
+    accentHue=Number(e.target.value);
+    document.documentElement.style.setProperty('--accent-hue',accentHue);
+    $('hueValue').textContent=accentHue<190?'Mint':accentHue<230?'Aqua':accentHue<270?'Blue':'Violet';
+    drawVolume();
+  });
+  $('spinToggle').addEventListener('click',()=>{
+    spinning=!spinning;$('spinToggle').textContent=spinning?'❚❚ Stop rotation':'▶ Start rotation';
+    $('spinToggle').setAttribute('aria-pressed',String(spinning));lastFrame=0;
+  });
+  function renderFrame(now){
+    if(spinning&&!document.hidden&&!dragging){
+      if(lastFrame)yaw=(yaw+Math.min(now-lastFrame,60)*.013*speed)%360;
+      $('yaw').value=String(Math.round(yaw));$('yawValue').textContent=`${Math.round(yaw)>180?Math.round(yaw)-360:Math.round(yaw)}°`;drawVolume();
+    }
+    lastFrame=now;requestAnimationFrame(renderFrame);
+  }
+  canvas.addEventListener('pointerdown',e=>{dragging=true;spinning=false;$('spinToggle').textContent='▶ Start rotation';$('spinToggle').setAttribute('aria-pressed','false');lastX=e.clientX;lastY=e.clientY;canvas.setPointerCapture(e.pointerId)});
+  canvas.addEventListener('pointermove',e=>{
+    if(!dragging)return;
+    const dx=e.clientX-lastX,dy=e.clientY-lastY;lastX=e.clientX;lastY=e.clientY;
+    yaw=(yaw+dx*.6+360)%360;tilt=Math.max(15,Math.min(85,tilt+dy*.35));
+    $('yaw').value=String(Math.round(yaw));$('yawValue').textContent=`${Math.round(yaw)>180?Math.round(yaw)-360:Math.round(yaw)}°`;
+    $('tilt').value=String(Math.round(tilt));$('tiltValue').textContent=`${Math.round(tilt)}°`;drawVolume();
+  });
+  canvas.addEventListener('pointerup',()=>{dragging=false});canvas.addEventListener('pointercancel',()=>{dragging=false});
+  if(window.ResizeObserver)new ResizeObserver(setCanvasSize).observe(canvas);
+  else window.addEventListener('resize',setCanvasSize);
+  requestAnimationFrame(renderFrame);
+
+  function refreshAll(){
+    refreshSliderValues();refreshLiveRows();
+    const d=determinant(matrix);
+    const live=$('liveDet');live.textContent=signNumber(d);
+    live.className=`live-det mono ${d<0?'negative':'positive'}`;
+    $('liveStatus').textContent=d===0?'Singular matrix · zero 3D volume':d>0?'Positive orientation · nonzero volume':'Negative orientation · nonzero volume';
+    const fill=$('signedFill'),width=Math.min(Math.abs(d)/30,1)*50;
+    fill.style.width=`${width}%`;fill.style.left=d<0?`${50-width}%`:'50%';fill.style.background=d<0?'var(--pink)':'var(--accent)';
+    $('latestAction').textContent=lastAction;
+    updateCofactor();updateSarrus();updateGeometryNumbers();
+  }
+
+  /* THREE QUICK QUESTIONS */
+  const questions=[
+    {q:'If det A = +6, what is det B after exchanging rows 1 and 2 once?', options:['−6','+6','0'], correct:0, explanation:'Correct. A single row swap reverses the sign: det B = −det A = −6.'},
+    {q:'Starting from det A = +6, what happens if you swap two rows and then swap them back?',options:['−6','+6','+12'],correct:1,explanation:'Exactly. Each swap multiplies by −1, so two swaps multiply by (−1)² = +1.'},
+    {q:'What is the determinant if any two rows of a 3 × 3 matrix are identical?',options:['0','+6','−6'],correct:0,explanation:'Yes. Swapping identical rows changes nothing, but alternation says det = −det, hence det = 0.'}
+  ];
+  let quizIndex=0, quizCorrect=0,answered=false;
+  function renderQuiz(){
+    const q=questions[quizIndex];answered=false;
+    $('quizStep').textContent=`QUESTION ${quizIndex+1} OF ${questions.length}`;
+    $('quizQuestion').textContent=q.q;
+    $('quizAnswers').innerHTML='';
+    q.options.forEach((option,i)=>{
+      const btn=document.createElement('button');btn.type='button';btn.className='quiz-choice';btn.textContent=option;btn.addEventListener('click',()=>answerQuiz(i));$('quizAnswers').appendChild(btn);
+    });
+    $('quizFeedback').textContent='Choose an answer to check your understanding.';
+    $('quizNext').disabled=true;
+    $('quizNext').textContent=quizIndex===questions.length-1?'Restart quiz ↺':'Next question →';
+    $('quizScore').textContent=`${quizCorrect} / ${questions.length}`;
+  }
+  function answerQuiz(i){
+    if(answered)return;
+    answered=true;const q=questions[quizIndex],correct=i===q.correct;
+    if(correct)quizCorrect++;
+    [...$('quizAnswers').children].forEach((btn,index)=>{btn.disabled=true;if(index===q.correct)btn.classList.add('correct');if(index===i&&!correct)btn.classList.add('wrong');});
+    $('quizFeedback').textContent=(correct?'✓ ':'Not quite. ')+q.explanation;
+    $('quizNext').disabled=false;$('quizScore').textContent=`${quizCorrect} / ${questions.length}`;
+  }
+  $('quizNext').addEventListener('click',()=>{if(quizIndex===questions.length-1){quizIndex=0;quizCorrect=0;}else quizIndex++;renderQuiz()});
+  renderQuiz();
+  refreshAll();
+  setCanvasSize();
+})();
+</script>
+</body>
+</html>
